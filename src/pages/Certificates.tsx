@@ -1,20 +1,15 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Award, Download, Share2, Calendar } from "lucide-react";
+import { Award, Share2, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { certificateService } from "@/services/certificate.service";
+import { CertificateGenerator } from "@/components/CertificateGenerator";
 
 const Certificates = () => {
   const { toast } = useToast();
   const certificates = certificateService.getAll();
-
-  const handleDownload = (certificateId: string) => {
-    toast({
-      title: "Downloading Certificate",
-      description: "Your certificate PDF is being prepared...",
-    });
-  };
+  const studentName = "Ahmed Mohammed"; // يمكن استبداله بالبيانات الفعلية للطالب
 
   const handleShare = (certificateId: string) => {
     toast({
@@ -67,14 +62,10 @@ const Certificates = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  variant="secondary"
-                  className="flex-1"
-                  onClick={() => handleDownload(certificate.id)}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
+                <CertificateGenerator
+                  certificate={certificate}
+                  studentName={studentName}
+                />
                 <Button
                   variant="outline"
                   size="icon"

@@ -103,6 +103,12 @@ const CourseDetails = () => {
                 variant={course.isLocked ? "gold" : "oxford"}
                 size="lg"
                 className="w-full sm:w-auto"
+                onClick={() => {
+                  if (!course.isLocked) {
+                    // الانتقال لأول درس في الكورس
+                    navigate(`/courses/${course.id}/lessons/1`);
+                  }
+                }}
               >
                 {course.isLocked ? t("enroll.now") : t("continue.learning")}
               </Button>

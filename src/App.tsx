@@ -12,6 +12,7 @@ import LoadingPage from "./pages/Loading";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const MyCourses = lazy(() => import("./pages/MyCourses"));
 const CourseDetails = lazy(() => import("./pages/CourseDetails"));
+const LessonViewer = lazy(() => import("./pages/LessonViewer"));
 const Assignments = lazy(() => import("./pages/Assignments"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const LiveClass = lazy(() => import("./pages/LiveClass"));
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/courses" element={<MyCourses />} />
                 <Route path="/courses/:courseId" element={<CourseDetails />} />
+                <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonViewer />} />
                 <Route path="/assignments" element={<Assignments />} />
                 <Route path="/schedule" element={<Schedule />} />
                 <Route path="/live-class" element={<LiveClass />} />
