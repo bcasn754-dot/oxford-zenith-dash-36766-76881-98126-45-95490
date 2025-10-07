@@ -49,10 +49,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   platformName: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#002147",
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
   title: {
     fontSize: 32,
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   body: {
     textAlign: "center",
-    marginVertical: 10,
+    marginVertical: 5,
   },
   bodyText: {
     fontSize: 12,
@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   gradeSection: {
-    marginVertical: 15,
-    padding: 12,
+    marginVertical: 10,
+    padding: 10,
     backgroundColor: "#f8f8f8",
     borderRadius: 5,
   },
@@ -174,7 +174,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
           {/* Platform Header */}
           <View style={styles.platformHeader}>
             <Image src={platformLogo} style={styles.logo} />
-            <Text style={styles.platformName}>CAMBRIDGE</Text>
+            <Text style={styles.platformName}>U CAMBRIDGE</Text>
           </View>
 
           {/* Header */}
