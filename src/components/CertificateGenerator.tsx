@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Certificate } from "@/models/certificate.model";
+import platformLogo from "@/assets/platform-logo.png";
 
 // Define styles for PDF
 const styles = StyleSheet.create({
@@ -34,7 +35,24 @@ const styles = StyleSheet.create({
   },
   header: {
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 20,
+  },
+  platformHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    marginRight: 10,
+  },
+  platformName: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#002147",
+    letterSpacing: 2,
   },
   title: {
     fontSize: 32,
@@ -55,29 +73,29 @@ const styles = StyleSheet.create({
   },
   body: {
     textAlign: "center",
-    marginVertical: 20,
+    marginVertical: 10,
   },
   bodyText: {
     fontSize: 12,
     color: "#333333",
-    marginBottom: 15,
+    marginBottom: 10,
   },
   studentName: {
     fontSize: 28,
     fontWeight: "bold",
     color: "#002147",
-    marginVertical: 15,
+    marginVertical: 10,
     textDecoration: "underline",
   },
   courseTitle: {
     fontSize: 18,
     color: "#002147",
     fontWeight: "bold",
-    marginVertical: 10,
+    marginVertical: 8,
   },
   gradeSection: {
-    marginVertical: 20,
-    padding: 15,
+    marginVertical: 15,
+    padding: 12,
     backgroundColor: "#f8f8f8",
     borderRadius: 5,
   },
@@ -88,15 +106,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   performanceText: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#D4AF37",
     fontStyle: "italic",
   },
   footer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 30,
-    paddingTop: 20,
+    marginTop: 20,
+    paddingTop: 15,
     borderTop: "1px solid #cccccc",
   },
   footerSection: {
@@ -123,7 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: "#999999",
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
 });
 
@@ -153,6 +171,12 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.container}>
         <View style={styles.innerBorder}>
+          {/* Platform Header */}
+          <View style={styles.platformHeader}>
+            <Image src={platformLogo} style={styles.logo} />
+            <Text style={styles.platformName}>CAMBRIDGE</Text>
+          </View>
+
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>CERTIFICATE OF COMPLETION</Text>
@@ -202,7 +226,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
             <View style={styles.footerSection}>
               <View style={styles.signatureLine} />
               <Text style={styles.footerLabel}>Director Signature</Text>
-              <Text style={styles.footerValue}>LTOX Platform</Text>
+              <Text style={styles.footerValue}>U CAMBRIDGE Platform</Text>
             </View>
             <View style={styles.footerSection}>
               <Text style={styles.footerLabel}>Certificate Level</Text>
