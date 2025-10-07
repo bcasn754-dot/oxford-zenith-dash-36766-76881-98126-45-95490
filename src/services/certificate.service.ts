@@ -6,17 +6,17 @@ const certificatesData: Certificate[] = [
     id: "1",
     title: "Business English Communication - Level B1",
     course: "Business English Communication",
-    issueDate: "2025-09-30",
-    grade: 90,
-    certificateNumber: "LTOX-2025-BEC-B1-001234",
-  },
-  {
-    id: "2",
-    title: "English Grammar Fundamentals",
-    course: "Grammar Essentials",
-    issueDate: "2025-08-15",
-    grade: 85,
-    certificateNumber: "LTOX-2025-GRM-A2-001156",
+  issueDate: "2025-09-30",
+  grade: 90,
+  certificateNumber: "CAMBRIDGE-2025-BEC-B1-001234",
+},
+{
+  id: "2",
+  title: "English Grammar Fundamentals",
+  course: "Grammar Essentials",
+  issueDate: "2025-08-15",
+  grade: 85,
+  certificateNumber: "CAMBRIDGE-2025-GRM-A2-001156",
   },
 ];
 

@@ -152,15 +152,13 @@ const styles = StyleSheet.create({
 
 // Get performance text based on grade
 const getPerformanceText = (grade: number): string => {
-  if (grade >= 95) {
-    return "Outstanding Performance - Excellent Mastery";
-  } else if (grade >= 90) {
-    return "Exceptional Achievement - High Distinction";
-  } else if (grade >= 85) {
-    return "Excellent Performance - Distinction";
-  } else if (grade >= 80) {
+  if (grade >= 100) {
+    return "Perfect Score - Outstanding Mastery";
+  } else if (grade >= 90 && grade <= 99) {
+    return "Excellent Achievement - High Distinction";
+  } else if (grade >= 80 && grade <= 89) {
     return "Very Good Achievement - Merit";
-  } else if (grade >= 75) {
+  } else if (grade >= 70 && grade <= 79) {
     return "Good Performance - Above Average";
   } else {
     return "Satisfactory Completion";
@@ -192,13 +190,10 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
           {/* Body */}
           <View style={styles.body}>
             <Text style={styles.studentName}>{studentName}</Text>
-            <Text style={styles.bodyText}>
+            <Text style={{ ...styles.bodyText, marginTop: 8 }}>
               has successfully completed the course
             </Text>
             <Text style={styles.courseTitle}>{certificate.title}</Text>
-            <Text style={styles.bodyText}>
-              Course: {certificate.course}
-            </Text>
 
             {/* Grade Section */}
             <View style={styles.gradeSection}>
