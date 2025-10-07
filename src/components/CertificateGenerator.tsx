@@ -49,66 +49,71 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   platformName: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#002147",
-    letterSpacing: 1.5,
+    letterSpacing: 2,
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "bold",
     color: "#002147",
-    marginBottom: 10,
+    marginBottom: 15,
+    letterSpacing: 1,
   },
   subtitle: {
     fontSize: 14,
     color: "#666666",
-    marginBottom: 5,
+    marginBottom: 15,
   },
   divider: {
-    width: 100,
+    width: 120,
     height: 3,
     backgroundColor: "#D4AF37",
-    margin: "10px auto",
+    margin: "15px auto",
   },
   body: {
     textAlign: "center",
-    marginVertical: 5,
+    marginVertical: 20,
   },
   bodyText: {
     fontSize: 12,
     color: "#333333",
-    marginBottom: 10,
+    marginBottom: 15,
+    lineHeight: 1.6,
   },
   studentName: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#002147",
-    marginVertical: 10,
+    marginVertical: 20,
     textDecoration: "underline",
+    letterSpacing: 0.5,
   },
   courseTitle: {
+    fontSize: 20,
+    color: "#002147",
+    fontWeight: "bold",
+    marginVertical: 12,
+    letterSpacing: 0.5,
+  },
+  gradeSection: {
+    marginVertical: 20,
+    padding: 15,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 8,
+  },
+  gradeText: {
     fontSize: 18,
     color: "#002147",
     fontWeight: "bold",
-    marginVertical: 8,
-  },
-  gradeSection: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 5,
-  },
-  gradeText: {
-    fontSize: 16,
-    color: "#002147",
-    fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 8,
   },
   performanceText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#D4AF37",
     fontStyle: "italic",
+    marginTop: 5,
   },
   footer: {
     flexDirection: "row",
@@ -174,7 +179,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
           {/* Platform Header */}
           <View style={styles.platformHeader}>
             <Image src={platformLogo} style={styles.logo} />
-            <Text style={styles.platformName}>U CAMBRIDGE</Text>
+            <Text style={styles.platformName}>CAMBRIDGE</Text>
           </View>
 
           {/* Header */}
@@ -226,7 +231,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
             <View style={styles.footerSection}>
               <View style={styles.signatureLine} />
               <Text style={styles.footerLabel}>Director Signature</Text>
-              <Text style={styles.footerValue}>U CAMBRIDGE Platform</Text>
+              <Text style={styles.footerValue}>CAMBRIDGE Platform</Text>
             </View>
             <View style={styles.footerSection}>
               <Text style={styles.footerLabel}>Certificate Level</Text>
