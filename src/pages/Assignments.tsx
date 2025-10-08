@@ -1,11 +1,14 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AssignmentCard } from "@/components/AssignmentCard";
+import { ResourceCard } from "@/components/ResourceCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { assignmentService } from "@/services/assignment.service";
-import { Upload, Filter, Search } from "lucide-react";
+import { resourceService } from "@/services/resource.service";
+import { Upload, Search, FileAudio, BookOpen, FolderKanban, BookMarked, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
@@ -13,9 +16,16 @@ const Assignments = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "submitted" | "graded">("all");
+  const [activeTab, setActiveTab] = useState("assignments");
   
   const activeAssignments = assignmentService.getActive();
   const gradedAssignments = assignmentService.getGraded();
+  
+  const audioResources = resourceService.getByType("audio");
+  const storyResources = resourceService.getByType("story");
+  const projectResources = resourceService.getByType("project");
+  const workbookResources = resourceService.getByType("workbook");
+  const testResources = resourceService.getByType("test");
 
   const handleFileUpload = (assignmentId: string) => {
     // في التطبيق الحقيقي، هنا سيتم فتح نافذة اختيار الملف
@@ -44,9 +54,41 @@ const Assignments = () => {
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Assignments</h1>
-          <p className="text-muted-foreground">View, submit and track your course assignments</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Course Materials</h1>
+          <p className="text-muted-foreground">Access assignments and learning resources</p>
         </div>
+
+        {/* Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="assignments" className="gap-2">
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">Assignments</span>
+            </TabsTrigger>
+            <TabsTrigger value="audio" className="gap-2">
+              <FileAudio className="w-4 h-4" />
+              <span className="hidden sm:inline">Audio</span>
+            </TabsTrigger>
+            <TabsTrigger value="story" className="gap-2">
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Story</span>
+            </TabsTrigger>
+            <TabsTrigger value="project" className="gap-2">
+              <FolderKanban className="w-4 h-4" />
+              <span className="hidden sm:inline">Project</span>
+            </TabsTrigger>
+            <TabsTrigger value="workbook" className="gap-2">
+              <BookMarked className="w-4 h-4" />
+              <span className="hidden sm:inline">Workbook</span>
+            </TabsTrigger>
+            <TabsTrigger value="tests" className="gap-2">
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Tests</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Assignments Tab */}
+          <TabsContent value="assignments" className="space-y-6 mt-6">
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -188,17 +230,84 @@ const Assignments = () => {
           </section>
         )}
 
-        {/* Tips Card */}
-        <Card className="p-6 bg-gradient-oxford text-primary-foreground shadow-elegant">
-          <h3 className="text-lg font-bold mb-3">📝 Assignment Tips</h3>
-          <ul className="space-y-2 text-sm opacity-90">
-            <li>• Submit your assignments before the deadline to avoid penalties</li>
-            <li>• Accepted formats: PDF, DOC, DOCX, PPT, PPTX</li>
-            <li>• Maximum file size: 10MB</li>
-            <li>• Check feedback carefully to improve future submissions</li>
-            <li>• Contact your instructor if you need an extension</li>
-          </ul>
-        </Card>
+            {/* Tips Card */}
+            <Card className="p-6 bg-gradient-oxford text-primary-foreground shadow-elegant">
+              <h3 className="text-lg font-bold mb-3">📝 Assignment Tips</h3>
+              <ul className="space-y-2 text-sm opacity-90">
+                <li>• Submit your assignments before the deadline to avoid penalties</li>
+                <li>• Accepted formats: PDF, DOC, DOCX, PPT, PPTX</li>
+                <li>• Maximum file size: 10MB</li>
+                <li>• Check feedback carefully to improve future submissions</li>
+                <li>• Contact your instructor if you need an extension</li>
+              </ul>
+            </Card>
+          </TabsContent>
+
+          {/* Audio Tab */}
+          <TabsContent value="audio" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Audio Resources</h2>
+              <Badge variant="secondary">{audioResources.length}</Badge>
+            </div>
+            <div className="space-y-4">
+              {audioResources.map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Story Tab */}
+          <TabsContent value="story" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Story Resources</h2>
+              <Badge variant="secondary">{storyResources.length}</Badge>
+            </div>
+            <div className="space-y-4">
+              {storyResources.map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Project Tab */}
+          <TabsContent value="project" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Project Resources</h2>
+              <Badge variant="secondary">{projectResources.length}</Badge>
+            </div>
+            <div className="space-y-4">
+              {projectResources.map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Workbook Tab */}
+          <TabsContent value="workbook" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Workbook Resources</h2>
+              <Badge variant="secondary">{workbookResources.length}</Badge>
+            </div>
+            <div className="space-y-4">
+              {workbookResources.map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Tests Tab */}
+          <TabsContent value="tests" className="space-y-6 mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground">Test Resources</h2>
+              <Badge variant="secondary">{testResources.length}</Badge>
+            </div>
+            <div className="space-y-4">
+              {testResources.map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </MainLayout>
   );
