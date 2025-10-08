@@ -12,6 +12,7 @@ import {
   BookOpen,
   Video,
   FileText,
+  ExternalLink,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { lessonService } from "@/services/lesson.service";
@@ -165,42 +166,73 @@ const LessonViewer = () => {
 
               {/* Vocabulary Content */}
               {currentLesson.type === "vocabulary" && currentLesson.content.vocabulary && (
-                <div className="space-y-4 mb-6">
-                  {currentLesson.content.vocabulary.map((item, index) => (
-                    <Card key={index} className="p-6 hover:shadow-hover transition-shadow">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-xl font-bold text-foreground mb-1">
-                            {item.word}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">{item.pronunciation}</p>
+                <>
+                  <h2 className="text-xl font-bold text-foreground mb-4">مفردات الدرس</h2>
+                  <div className="space-y-4 mb-6">
+                    {currentLesson.content.vocabulary.map((item, index) => (
+                      <Card key={index} className="p-6 hover:shadow-hover transition-shadow">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground mb-1">
+                              {item.word}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">{item.pronunciation}</p>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => {
+                              if (item.audioUrl && item.audioUrl !== "#") {
+                                const audio = new Audio(item.audioUrl);
+                                audio.play();
+                              }
+                            }}
+                          >
+                            <Volume2 className="w-5 h-5" />
+                          </Button>
                         </div>
-                        <Button variant="ghost" size="icon">
-                          <Volume2 className="w-5 h-5" />
-                        </Button>
-                      </div>
-                      <p className="text-lg text-accent mb-2">{item.translation}</p>
-                      <div className="p-3 bg-muted rounded-lg">
-                        <p className="text-sm text-foreground italic">
-                          <span className="font-semibold">Example:</span> {item.example}
-                        </p>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                        <p className="text-lg text-accent mb-2">{item.translation}</p>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <p className="text-sm text-foreground italic">
+                            <span className="font-semibold">Example:</span> {item.example}
+                          </p>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </>
               )}
 
-              {/* Download PDF */}
+              {/* References Section */}
               {currentLesson.content.pdfUrl && (
-                <Button
-                  variant="outline"
-                  className="w-full gap-2"
-                  onClick={handleDownloadPDF}
-                >
-                  <Download className="w-4 h-4" />
-                  Download Lesson PDF
-                </Button>
+                <Card className="p-6 bg-accent/5 mb-6">
+                  <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    مراجع الدرس
+                  </h3>
+                  <div className="space-y-3">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-2"
+                      onClick={handleDownloadPDF}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل ملف PDF للدرس
+                    </Button>
+                    {currentLesson.content.videoUrl && (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start gap-2"
+                        onClick={() => window.open(currentLesson.content.videoUrl, "_blank")}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        فتح الفيديو في نافذة جديدة
+                      </Button>
+                    )}
+                  </div>
+                </Card>
               )}
+
             </Card>
 
             {/* Navigation */}

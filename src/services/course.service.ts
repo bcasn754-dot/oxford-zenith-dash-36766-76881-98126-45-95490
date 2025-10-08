@@ -32,7 +32,9 @@ const coursesData: Course[] = [
       { title: "Business Presentations", lessons: 12, completed: 8 },
       { title: "Meeting Skills", lessons: 10, completed: 0 },
       { title: "Networking & Communication", lessons: 8, completed: 0 }
-    ]
+    ],
+    bookPdfUrl: "https://drive.google.com/file/d/sample-book-pdf",
+    bookDriveUrl: "https://drive.google.com/file/d/sample-book-drive"
   },
   {
     id: "2",

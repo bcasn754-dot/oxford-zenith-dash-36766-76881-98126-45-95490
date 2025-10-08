@@ -19,4 +19,6 @@ export interface Course {
   description?: string;
   learningPoints?: string[];
   modules?: CourseModule[];
+  bookPdfUrl?: string;
+  bookDriveUrl?: string;
 }

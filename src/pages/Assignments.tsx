@@ -8,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { assignmentService } from "@/services/assignment.service";
 import { resourceService } from "@/services/resource.service";
+import { courseService } from "@/services/course.service";
 import { Upload, Search, FileAudio, BookOpen, FolderKanban, BookMarked, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 
 const Assignments = () => {
@@ -17,15 +19,31 @@ const Assignments = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "submitted" | "graded">("all");
   const [activeTab, setActiveTab] = useState("assignments");
+  const [selectedCourse, setSelectedCourse] = useState<string>("all");
+  const [selectedLevel, setSelectedLevel] = useState<string>("all");
   
   const activeAssignments = assignmentService.getActive();
   const gradedAssignments = assignmentService.getGraded();
+  const allCourses = courseService.getAll();
   
-  const audioResources = resourceService.getByType("audio");
-  const storyResources = resourceService.getByType("story");
-  const projectResources = resourceService.getByType("project");
-  const workbookResources = resourceService.getByType("workbook");
-  const testResources = resourceService.getByType("test");
+  // Filter resources based on course and level
+  const filterResources = (resources: any[]) => {
+    return resources.filter(resource => {
+      const courseMatch = selectedCourse === "all" || resource.courseId === selectedCourse;
+      const levelMatch = selectedLevel === "all" || 
+        allCourses.find(c => c.id === resource.courseId)?.level === selectedLevel;
+      return courseMatch && levelMatch;
+    });
+  };
+  
+  const audioResources = filterResources(resourceService.getByType("audio"));
+  const storyResources = filterResources(resourceService.getByType("story"));
+  const projectResources = filterResources(resourceService.getByType("project"));
+  const workbookResources = filterResources(resourceService.getByType("workbook"));
+  const testResources = filterResources(resourceService.getByType("test"));
+  
+  // Get unique levels
+  const uniqueLevels = Array.from(new Set(allCourses.map(c => c.level)));
 
   const handleFileUpload = (assignmentId: string) => {
     // في التطبيق الحقيقي، هنا سيتم فتح نافذة اختيار الملف
@@ -245,66 +263,316 @@ const Assignments = () => {
 
           {/* Audio Tab */}
           <TabsContent value="audio" className="space-y-6 mt-6">
+            {/* Filters */}
+            <Card className="p-6 shadow-elegant">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر الكورس" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الكورسات</SelectItem>
+                      {allCourses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
+                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المستوى" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع المستويات</SelectItem>
+                      {uniqueLevels.map(level => (
+                        <SelectItem key={level} value={level}>
+                          Level {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </Card>
+            
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Audio Resources</h2>
               <Badge variant="secondary">{audioResources.length}</Badge>
             </div>
             <div className="space-y-4">
-              {audioResources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} />
-              ))}
+              {audioResources.length > 0 ? (
+                audioResources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))
+              ) : (
+                <Card className="p-12 text-center shadow-elegant">
+                  <FileAudio className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    لا توجد موارد صوتية
+                  </h3>
+                  <p className="text-muted-foreground">
+                    لم يتم العثور على موارد صوتية للكورس والمستوى المحدد
+                  </p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
           {/* Story Tab */}
           <TabsContent value="story" className="space-y-6 mt-6">
+            {/* Filters */}
+            <Card className="p-6 shadow-elegant">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر الكورس" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الكورسات</SelectItem>
+                      {allCourses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
+                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المستوى" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع المستويات</SelectItem>
+                      {uniqueLevels.map(level => (
+                        <SelectItem key={level} value={level}>
+                          Level {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </Card>
+            
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Story Resources</h2>
               <Badge variant="secondary">{storyResources.length}</Badge>
             </div>
             <div className="space-y-4">
-              {storyResources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} />
-              ))}
+              {storyResources.length > 0 ? (
+                storyResources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))
+              ) : (
+                <Card className="p-12 text-center shadow-elegant">
+                  <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    لا توجد قصص
+                  </h3>
+                  <p className="text-muted-foreground">
+                    لم يتم العثور على قصص للكورس والمستوى المحدد
+                  </p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
           {/* Project Tab */}
           <TabsContent value="project" className="space-y-6 mt-6">
+            {/* Filters */}
+            <Card className="p-6 shadow-elegant">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر الكورس" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الكورسات</SelectItem>
+                      {allCourses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
+                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المستوى" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع المستويات</SelectItem>
+                      {uniqueLevels.map(level => (
+                        <SelectItem key={level} value={level}>
+                          Level {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </Card>
+            
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Project Resources</h2>
               <Badge variant="secondary">{projectResources.length}</Badge>
             </div>
             <div className="space-y-4">
-              {projectResources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} />
-              ))}
+              {projectResources.length > 0 ? (
+                projectResources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))
+              ) : (
+                <Card className="p-12 text-center shadow-elegant">
+                  <FolderKanban className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    لا توجد مشاريع
+                  </h3>
+                  <p className="text-muted-foreground">
+                    لم يتم العثور على مشاريع للكورس والمستوى المحدد
+                  </p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
           {/* Workbook Tab */}
           <TabsContent value="workbook" className="space-y-6 mt-6">
+            {/* Filters */}
+            <Card className="p-6 shadow-elegant">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر الكورس" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الكورسات</SelectItem>
+                      {allCourses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
+                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المستوى" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع المستويات</SelectItem>
+                      {uniqueLevels.map(level => (
+                        <SelectItem key={level} value={level}>
+                          Level {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </Card>
+            
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Workbook Resources</h2>
               <Badge variant="secondary">{workbookResources.length}</Badge>
             </div>
             <div className="space-y-4">
-              {workbookResources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} />
-              ))}
+              {workbookResources.length > 0 ? (
+                workbookResources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))
+              ) : (
+                <Card className="p-12 text-center shadow-elegant">
+                  <BookMarked className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    لا توجد كتب تمارين
+                  </h3>
+                  <p className="text-muted-foreground">
+                    لم يتم العثور على كتب تمارين للكورس والمستوى المحدد
+                  </p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
           {/* Tests Tab */}
           <TabsContent value="tests" className="space-y-6 mt-6">
+            {/* Filters */}
+            <Card className="p-6 shadow-elegant">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
+                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر الكورس" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الكورسات</SelectItem>
+                      {allCourses.map(course => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
+                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المستوى" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع المستويات</SelectItem>
+                      {uniqueLevels.map(level => (
+                        <SelectItem key={level} value={level}>
+                          Level {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </Card>
+            
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Test Resources</h2>
               <Badge variant="secondary">{testResources.length}</Badge>
             </div>
             <div className="space-y-4">
-              {testResources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} />
-              ))}
+              {testResources.length > 0 ? (
+                testResources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))
+              ) : (
+                <Card className="p-12 text-center shadow-elegant">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    لا توجد اختبارات
+                  </h3>
+                  <p className="text-muted-foreground">
+                    لم يتم العثور على اختبارات للكورس والمستوى المحدد
+                  </p>
+                </Card>
+              )}
             </div>
           </TabsContent>
         </Tabs>

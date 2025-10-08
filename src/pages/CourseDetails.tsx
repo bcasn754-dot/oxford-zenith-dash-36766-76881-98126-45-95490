@@ -2,15 +2,17 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { BadgeLevel } from "@/components/ui/badge-level";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { ArrowLeft, Clock, BookOpen, Award, Users } from "lucide-react";
+import { ArrowLeft, Clock, BookOpen, Award, Users, Download, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { courseService } from "@/services/course.service";
+import { useToast } from "@/hooks/use-toast";
 
 const CourseDetails = () => {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const { t } = useLanguage();
+  const { toast } = useToast();
   
   const course = courseService.getById(courseId || "");
   
@@ -20,6 +22,22 @@ const CourseDetails = () => {
   }
 
   const completedLessons = course.modules?.reduce((acc, module) => acc + module.completed, 0) || 0;
+
+  const handleDownloadBook = () => {
+    if (course.bookPdfUrl) {
+      window.open(course.bookPdfUrl, "_blank");
+      toast({
+        title: "تحميل الكتاب",
+        description: "جاري تحميل كتاب الطالب...",
+      });
+    }
+  };
+
+  const handleOpenBookInDrive = () => {
+    if (course.bookDriveUrl) {
+      window.open(course.bookDriveUrl, "_blank");
+    }
+  };
 
   return (
     <MainLayout>
@@ -99,19 +117,44 @@ const CourseDetails = () => {
                 </div>
               )}
 
-              <Button
-                variant={course.isLocked ? "gold" : "oxford"}
-                size="lg"
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  if (!course.isLocked) {
-                    // الانتقال لأول درس في الكورس
-                    navigate(`/courses/${course.id}/lessons/1`);
-                  }
-                }}
-              >
-                {course.isLocked ? t("enroll.now") : t("continue.learning")}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant={course.isLocked ? "gold" : "oxford"}
+                  size="lg"
+                  className="flex-1 sm:flex-initial"
+                  onClick={() => {
+                    if (!course.isLocked) {
+                      // الانتقال لأول درس في الكورس
+                      navigate(`/courses/${course.id}/lessons/1`);
+                    }
+                  }}
+                >
+                  {course.isLocked ? t("enroll.now") : t("continue.learning")}
+                </Button>
+                
+                {!course.isLocked && course.bookPdfUrl && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="gap-2"
+                      onClick={handleDownloadBook}
+                    >
+                      <Download className="w-4 h-4" />
+                      تحميل الكتاب
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="gap-2"
+                      onClick={handleOpenBookInDrive}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      فتح في Drive
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
