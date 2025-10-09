@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -9,7 +10,11 @@ interface AssignmentCardProps {
   onUpload?: (assignmentId: string) => void;
 }
 
-export const AssignmentCard = ({ assignment, onUpload }: AssignmentCardProps) => {
+/**
+ * Optimized assignment card component
+ * Memoized to prevent unnecessary re-renders
+ */
+export const AssignmentCard = memo(({ assignment, onUpload }: AssignmentCardProps) => {
   const getStatusIcon = (status: Assignment["status"]) => {
     switch (status) {
       case "pending":
@@ -80,4 +85,6 @@ export const AssignmentCard = ({ assignment, onUpload }: AssignmentCardProps) =>
       </div>
     </Card>
   );
-};
+});
+
+AssignmentCard.displayName = "AssignmentCard";

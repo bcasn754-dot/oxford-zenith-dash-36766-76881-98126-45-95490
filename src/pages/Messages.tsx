@@ -4,9 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Search } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { messageService } from "@/services/message.service";
 import { Contact } from "@/models/message.model";
+import { ContactItem } from "@/components/ContactItem";
+import { MessageItem } from "@/components/MessageItem";
+import { VirtualList } from "@/components/VirtualList";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const Messages = () => {
@@ -17,19 +20,19 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  const handleContactSelect = (contact: Contact) => {
+  const handleContactSelect = useCallback((contact: Contact) => {
     setSelectedContact(contact);
     setMessages(messageService.getMessagesByContactId(contact.id));
     messageService.markAsRead(contact.id);
-  };
+  }, []);
 
-  const sendMessage = () => {
+  const sendMessage = useCallback(() => {
     if (newMessage.trim()) {
       const message = messageService.sendMessage(selectedContact.id, newMessage);
       setMessages([...messages, message]);
       setNewMessage("");
     }
-  };
+  }, [newMessage, selectedContact.id, messages]);
 
   // Filter contacts based on debounced search
   const filteredContacts = useMemo(() => {
@@ -71,36 +74,12 @@ const Messages = () => {
                   </div>
                 ) : (
                   filteredContacts.map((contact) => (
-                  <div
-                    key={contact.id}
-                    onClick={() => handleContactSelect(contact)}
-                    className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                      selectedContact.id === contact.id
-                        ? "bg-accent/20"
-                        : "hover:bg-secondary"
-                    }`}
-                  >
-                    <div className="w-12 h-12 rounded-full bg-gradient-gold flex items-center justify-center text-sm font-semibold text-accent-foreground flex-shrink-0">
-                      {contact.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold text-foreground truncate">
-                          {contact.name}
-                        </h3>
-                        {contact.unread > 0 && (
-                          <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center">
-                            {contact.unread}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-1">{contact.role}</p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {contact.lastMessage}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">{contact.timestamp}</p>
-                    </div>
-                  </div>
+                    <ContactItem
+                      key={contact.id}
+                      contact={contact}
+                      isSelected={selectedContact.id === contact.id}
+                      onClick={handleContactSelect}
+                    />
                   ))
                 )}
               </div>
@@ -120,30 +99,16 @@ const Messages = () => {
               </div>
             </div>
 
-            {/* Messages */}
-            <ScrollArea className="flex-1 p-6">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-lg p-3 ${
-                        message.isOwn
-                          ? "bg-gradient-oxford text-primary-foreground"
-                          : "bg-secondary text-foreground"
-                      }`}
-                    >
-                      <p className="text-sm mb-1">{message.content}</p>
-                      <p className={`text-xs ${message.isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                        {message.timestamp}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
+            {/* Messages with Virtual Scrolling */}
+            <div className="flex-1 overflow-hidden">
+              <VirtualList
+                items={messages}
+                itemHeight={80}
+                containerHeight={600}
+                renderItem={(message) => <MessageItem message={message} />}
+                overscan={5}
+              />
+            </div>
 
             {/* Message Input */}
             <div className="p-4 border-t border-border">

@@ -1,79 +1,129 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { AssignmentCard } from "@/components/AssignmentCard";
-import { ResourceCard } from "@/components/ResourceCard";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AssignmentsTabContent } from "@/components/AssignmentsTabContent";
+import { ResourceTabContent } from "@/components/ResourceTabContent";
 import { useToast } from "@/hooks/use-toast";
 import { assignmentService } from "@/services/assignment.service";
 import { resourceService } from "@/services/resource.service";
 import { courseService } from "@/services/course.service";
-import { Upload, Search, FileAudio, BookOpen, FolderKanban, BookMarked, FileText } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useResourceFilter } from "@/hooks/use-resource-filter";
+import {
+  Upload,
+  FileAudio,
+  BookOpen,
+  FolderKanban,
+  BookMarked,
+  FileText,
+} from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
 
 const Assignments = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "submitted" | "graded">("all");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "pending" | "submitted" | "graded"
+  >("all");
   const [activeTab, setActiveTab] = useState("assignments");
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  
-  const activeAssignments = assignmentService.getActive();
-  const gradedAssignments = assignmentService.getGraded();
-  const allCourses = courseService.getAll();
-  
-  // Filter resources based on course and level
-  const filterResources = (resources: any[]) => {
-    return resources.filter(resource => {
-      const courseMatch = selectedCourse === "all" || resource.courseId === selectedCourse;
-      const levelMatch = selectedLevel === "all" || 
-        allCourses.find(c => c.id === resource.courseId)?.level === selectedLevel;
-      return courseMatch && levelMatch;
-    });
-  };
-  
-  const audioResources = filterResources(resourceService.getByType("audio"));
-  const storyResources = filterResources(resourceService.getByType("story"));
-  const projectResources = filterResources(resourceService.getByType("project"));
-  const workbookResources = filterResources(resourceService.getByType("workbook"));
-  const testResources = filterResources(resourceService.getByType("test"));
-  
+
+  const activeAssignments = useMemo(
+    () => assignmentService.getActive(),
+    []
+  );
+  const gradedAssignments = useMemo(
+    () => assignmentService.getGraded(),
+    []
+  );
+  const allCourses = useMemo(() => courseService.getAll(), []);
+
   // Get unique levels
-  const uniqueLevels = Array.from(new Set(allCourses.map(c => c.level)));
+  const uniqueLevels = useMemo(
+    () => Array.from(new Set(allCourses.map((c) => c.level))),
+    [allCourses]
+  );
 
-  const handleFileUpload = (assignmentId: string) => {
-    // في التطبيق الحقيقي، هنا سيتم فتح نافذة اختيار الملف
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".pdf,.doc,.docx,.ppt,.pptx";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        toast({
-          title: "File Uploaded Successfully",
-          description: `${file.name} has been submitted for grading.`,
-        });
-        // هنا يمكن إضافة منطق رفع الملف
-      }
-    };
-    input.click();
-  };
+  // Get resources by type
+  const audioResources = useResourceFilter({
+    resources: resourceService.getByType("audio"),
+    selectedCourse,
+    selectedLevel,
+    allCourses,
+  });
 
-  const getStatusCount = (status: "pending" | "submitted" | "graded") => {
-    return assignmentService.getByStatus(status).length;
-  };
+  const storyResources = useResourceFilter({
+    resources: resourceService.getByType("story"),
+    selectedCourse,
+    selectedLevel,
+    allCourses,
+  });
+
+  const projectResources = useResourceFilter({
+    resources: resourceService.getByType("project"),
+    selectedCourse,
+    selectedLevel,
+    allCourses,
+  });
+
+  const workbookResources = useResourceFilter({
+    resources: resourceService.getByType("workbook"),
+    selectedCourse,
+    selectedLevel,
+    allCourses,
+  });
+
+  const testResources = useResourceFilter({
+    resources: resourceService.getByType("test"),
+    selectedCourse,
+    selectedLevel,
+    allCourses,
+  });
+
+  const handleFileUpload = useCallback(
+    (assignmentId: string) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".pdf,.doc,.docx,.ppt,.pptx";
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          toast({
+            title: "File Uploaded Successfully",
+            description: `${file.name} has been submitted for grading.`,
+          });
+        }
+      };
+      input.click();
+    },
+    [toast]
+  );
+
+  const getStatusCount = useCallback(
+    (status: "pending" | "submitted" | "graded") => {
+      return assignmentService.getByStatus(status).length;
+    },
+    []
+  );
+
+  const handleCourseChange = useCallback((value: string) => {
+    setSelectedCourse(value);
+  }, []);
+
+  const handleLevelChange = useCallback((value: string) => {
+    setSelectedLevel(value);
+  }, []);
 
   return (
     <MainLayout>
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Course Materials</h1>
-          <p className="text-muted-foreground">Access assignments and learning resources</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Course Materials
+          </h1>
+          <p className="text-muted-foreground">
+            Access assignments and learning resources
+          </p>
         </div>
 
         {/* Navigation Tabs */}
@@ -106,474 +156,99 @@ const Assignments = () => {
           </TabsList>
 
           {/* Assignments Tab */}
-          <TabsContent value="assignments" className="space-y-6 mt-6">
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="p-6 shadow-elegant hover:shadow-hover transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Pending</p>
-                <p className="text-3xl font-bold text-foreground">{getStatusCount("pending")}</p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                <Upload className="w-6 h-6 text-yellow-500" />
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6 shadow-elegant hover:shadow-hover transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Submitted</p>
-                <p className="text-3xl font-bold text-foreground">{getStatusCount("submitted")}</p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                <Upload className="w-6 h-6 text-blue-500" />
-              </div>
-            </div>
-          </Card>
-          <Card className="p-6 shadow-elegant hover:shadow-hover transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Graded</p>
-                <p className="text-3xl font-bold text-foreground">{getStatusCount("graded")}</p>
-              </div>
-              <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                <Badge className="w-6 h-6 text-green-500" />
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Search and Filter */}
-        <Card className="p-6 shadow-elegant">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search assignments..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={filterStatus === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterStatus("all")}
-              >
-                All
-              </Button>
-              <Button
-                variant={filterStatus === "pending" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterStatus("pending")}
-              >
-                Pending
-              </Button>
-              <Button
-                variant={filterStatus === "submitted" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterStatus("submitted")}
-              >
-                Submitted
-              </Button>
-              <Button
-                variant={filterStatus === "graded" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterStatus("graded")}
-              >
-                Graded
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* Active Assignments */}
-        {(filterStatus === "all" || filterStatus === "pending" || filterStatus === "submitted") && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">Active Assignments</h2>
-              <Badge variant="secondary">{activeAssignments.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {activeAssignments.length > 0 ? (
-                activeAssignments.map((assignment) => (
-                  <AssignmentCard
-                    key={assignment.id}
-                    assignment={assignment}
-                    onUpload={handleFileUpload}
-                  />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <Upload className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    No Active Assignments
-                  </h3>
-                  <p className="text-muted-foreground">
-                    You're all caught up! Check back later for new assignments.
-                  </p>
-                </Card>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* Graded Assignments */}
-        {(filterStatus === "all" || filterStatus === "graded") && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">Graded Assignments</h2>
-              <Badge variant="secondary">{gradedAssignments.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {gradedAssignments.length > 0 ? (
-                gradedAssignments.map((assignment) => (
-                  <AssignmentCard key={assignment.id} assignment={assignment} />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <Badge className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    No Graded Assignments Yet
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Complete and submit your assignments to see your grades here.
-                  </p>
-                </Card>
-              )}
-            </div>
-          </section>
-        )}
-
-            {/* Tips Card */}
-            <Card className="p-6 bg-gradient-oxford text-primary-foreground shadow-elegant">
-              <h3 className="text-lg font-bold mb-3">📝 Assignment Tips</h3>
-              <ul className="space-y-2 text-sm opacity-90">
-                <li>• Submit your assignments before the deadline to avoid penalties</li>
-                <li>• Accepted formats: PDF, DOC, DOCX, PPT, PPTX</li>
-                <li>• Maximum file size: 10MB</li>
-                <li>• Check feedback carefully to improve future submissions</li>
-                <li>• Contact your instructor if you need an extension</li>
-              </ul>
-            </Card>
+          <TabsContent value="assignments">
+            <AssignmentsTabContent
+              searchQuery={searchQuery}
+              filterStatus={filterStatus}
+              activeAssignments={activeAssignments}
+              gradedAssignments={gradedAssignments}
+              pendingCount={getStatusCount("pending")}
+              submittedCount={getStatusCount("submitted")}
+              gradedCount={getStatusCount("graded")}
+              onSearchChange={setSearchQuery}
+              onFilterChange={setFilterStatus}
+              onFileUpload={handleFileUpload}
+            />
           </TabsContent>
 
           {/* Audio Tab */}
-          <TabsContent value="audio" className="space-y-6 mt-6">
-            {/* Filters */}
-            <Card className="p-6 shadow-elegant">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
-                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الكورس" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الكورسات</SelectItem>
-                      {allCourses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
-                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر المستوى" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع المستويات</SelectItem>
-                      {uniqueLevels.map(level => (
-                        <SelectItem key={level} value={level}>
-                          Level {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-            
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Audio Resources</h2>
-              <Badge variant="secondary">{audioResources.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {audioResources.length > 0 ? (
-                audioResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <FileAudio className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    لا توجد موارد صوتية
-                  </h3>
-                  <p className="text-muted-foreground">
-                    لم يتم العثور على موارد صوتية للكورس والمستوى المحدد
-                  </p>
-                </Card>
-              )}
-            </div>
+          <TabsContent value="audio">
+            <ResourceTabContent
+              title="Audio Resources"
+              resources={audioResources}
+              icon={FileAudio}
+              emptyMessage="لم يتم العثور على موارد صوتية للكورس والمستوى المحدد"
+              selectedCourse={selectedCourse}
+              selectedLevel={selectedLevel}
+              allCourses={allCourses}
+              uniqueLevels={uniqueLevels}
+              onCourseChange={handleCourseChange}
+              onLevelChange={handleLevelChange}
+            />
           </TabsContent>
 
           {/* Story Tab */}
-          <TabsContent value="story" className="space-y-6 mt-6">
-            {/* Filters */}
-            <Card className="p-6 shadow-elegant">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
-                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الكورس" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الكورسات</SelectItem>
-                      {allCourses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
-                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر المستوى" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع المستويات</SelectItem>
-                      {uniqueLevels.map(level => (
-                        <SelectItem key={level} value={level}>
-                          Level {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-            
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Story Resources</h2>
-              <Badge variant="secondary">{storyResources.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {storyResources.length > 0 ? (
-                storyResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    لا توجد قصص
-                  </h3>
-                  <p className="text-muted-foreground">
-                    لم يتم العثور على قصص للكورس والمستوى المحدد
-                  </p>
-                </Card>
-              )}
-            </div>
+          <TabsContent value="story">
+            <ResourceTabContent
+              title="Story Resources"
+              resources={storyResources}
+              icon={BookOpen}
+              emptyMessage="لم يتم العثور على قصص للكورس والمستوى المحدد"
+              selectedCourse={selectedCourse}
+              selectedLevel={selectedLevel}
+              allCourses={allCourses}
+              uniqueLevels={uniqueLevels}
+              onCourseChange={handleCourseChange}
+              onLevelChange={handleLevelChange}
+            />
           </TabsContent>
 
           {/* Project Tab */}
-          <TabsContent value="project" className="space-y-6 mt-6">
-            {/* Filters */}
-            <Card className="p-6 shadow-elegant">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
-                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الكورس" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الكورسات</SelectItem>
-                      {allCourses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
-                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر المستوى" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع المستويات</SelectItem>
-                      {uniqueLevels.map(level => (
-                        <SelectItem key={level} value={level}>
-                          Level {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-            
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Project Resources</h2>
-              <Badge variant="secondary">{projectResources.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {projectResources.length > 0 ? (
-                projectResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <FolderKanban className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    لا توجد مشاريع
-                  </h3>
-                  <p className="text-muted-foreground">
-                    لم يتم العثور على مشاريع للكورس والمستوى المحدد
-                  </p>
-                </Card>
-              )}
-            </div>
+          <TabsContent value="project">
+            <ResourceTabContent
+              title="Project Resources"
+              resources={projectResources}
+              icon={FolderKanban}
+              emptyMessage="لم يتم العثور على مشاريع للكورس والمستوى المحدد"
+              selectedCourse={selectedCourse}
+              selectedLevel={selectedLevel}
+              allCourses={allCourses}
+              uniqueLevels={uniqueLevels}
+              onCourseChange={handleCourseChange}
+              onLevelChange={handleLevelChange}
+            />
           </TabsContent>
 
           {/* Workbook Tab */}
-          <TabsContent value="workbook" className="space-y-6 mt-6">
-            {/* Filters */}
-            <Card className="p-6 shadow-elegant">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
-                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الكورس" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الكورسات</SelectItem>
-                      {allCourses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
-                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر المستوى" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع المستويات</SelectItem>
-                      {uniqueLevels.map(level => (
-                        <SelectItem key={level} value={level}>
-                          Level {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-            
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Workbook Resources</h2>
-              <Badge variant="secondary">{workbookResources.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {workbookResources.length > 0 ? (
-                workbookResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <BookMarked className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    لا توجد كتب تمارين
-                  </h3>
-                  <p className="text-muted-foreground">
-                    لم يتم العثور على كتب تمارين للكورس والمستوى المحدد
-                  </p>
-                </Card>
-              )}
-            </div>
+          <TabsContent value="workbook">
+            <ResourceTabContent
+              title="Workbook Resources"
+              resources={workbookResources}
+              icon={BookMarked}
+              emptyMessage="لم يتم العثور على كتب عمل للكورس والمستوى المحدد"
+              selectedCourse={selectedCourse}
+              selectedLevel={selectedLevel}
+              allCourses={allCourses}
+              uniqueLevels={uniqueLevels}
+              onCourseChange={handleCourseChange}
+              onLevelChange={handleLevelChange}
+            />
           </TabsContent>
 
           {/* Tests Tab */}
-          <TabsContent value="tests" className="space-y-6 mt-6">
-            {/* Filters */}
-            <Card className="p-6 shadow-elegant">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">الكورس</label>
-                  <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الكورس" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع الكورسات</SelectItem>
-                      {allCourses.map(course => (
-                        <SelectItem key={course.id} value={course.id}>
-                          {course.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-foreground mb-2 block">المستوى</label>
-                  <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر المستوى" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">جميع المستويات</SelectItem>
-                      {uniqueLevels.map(level => (
-                        <SelectItem key={level} value={level}>
-                          Level {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-            
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">Test Resources</h2>
-              <Badge variant="secondary">{testResources.length}</Badge>
-            </div>
-            <div className="space-y-4">
-              {testResources.length > 0 ? (
-                testResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))
-              ) : (
-                <Card className="p-12 text-center shadow-elegant">
-                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    لا توجد اختبارات
-                  </h3>
-                  <p className="text-muted-foreground">
-                    لم يتم العثور على اختبارات للكورس والمستوى المحدد
-                  </p>
-                </Card>
-              )}
-            </div>
+          <TabsContent value="tests">
+            <ResourceTabContent
+              title="Test Resources"
+              resources={testResources}
+              icon={FileText}
+              emptyMessage="لم يتم العثور على اختبارات للكورس والمستوى المحدد"
+              selectedCourse={selectedCourse}
+              selectedLevel={selectedLevel}
+              allCourses={allCourses}
+              uniqueLevels={uniqueLevels}
+              onCourseChange={handleCourseChange}
+              onLevelChange={handleLevelChange}
+            />
           </TabsContent>
         </Tabs>
       </div>

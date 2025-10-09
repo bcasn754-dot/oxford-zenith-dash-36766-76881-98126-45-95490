@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,11 @@ const getResourceColor = (type: Resource["type"]) => {
   }
 };
 
-export const ResourceCard = ({ resource }: ResourceCardProps) => {
+/**
+ * Optimized resource card component
+ * Memoized to prevent unnecessary re-renders
+ */
+export const ResourceCard = memo(({ resource }: ResourceCardProps) => {
   const Icon = getResourceIcon(resource.type);
   const colorClass = getResourceColor(resource.type);
 
@@ -103,4 +108,6 @@ export const ResourceCard = ({ resource }: ResourceCardProps) => {
       </div>
     </Card>
   );
-};
+});
+
+ResourceCard.displayName = "ResourceCard";
