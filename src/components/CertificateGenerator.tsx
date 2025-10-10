@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     padding: 12,
     backgroundColor: "transparent",
-    borderRadius: 0,
   },
   gradeText: {
     fontSize: 20,
