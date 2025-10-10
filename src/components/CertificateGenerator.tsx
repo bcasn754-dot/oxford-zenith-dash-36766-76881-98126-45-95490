@@ -30,10 +30,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "50%",
     left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 350,
-    height: 350,
-    opacity: 0.06,
+    width: 400,
+    height: 400,
+    marginLeft: -200,
+    marginTop: -200,
+    opacity: 0.05,
     zIndex: 0,
   },
   innerBorder: {
@@ -48,18 +49,18 @@ const styles = StyleSheet.create({
   },
   header: {
     textAlign: "center",
-    marginBottom: 15,
+    marginBottom: 20,
   },
   platformHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: 25,
   },
   logo: {
-    width: 60,
-    height: 60,
-    marginRight: 10,
+    width: 80,
+    height: 80,
+    marginRight: 0,
   },
   platformName: {
     fontSize: 26,
@@ -87,9 +88,10 @@ const styles = StyleSheet.create({
   },
   body: {
     textAlign: "center",
-    marginVertical: 15,
+    marginVertical: 20,
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
   },
   bodyText: {
     fontSize: 11,
@@ -113,8 +115,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   gradeSection: {
-    marginVertical: 15,
-    padding: 12,
+    marginVertical: 20,
+    padding: 15,
     backgroundColor: "transparent",
   },
   gradeText: {
@@ -192,7 +194,6 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
           {/* Platform Header */}
           <View style={styles.platformHeader}>
             <Image src={platformLogo} style={styles.logo} />
-            <Text style={styles.platformName}>CAMBRIDGE</Text>
           </View>
 
           {/* Header */}
