@@ -39,6 +39,54 @@ const examsData: Exam[] = [
   },
 ];
 
+export interface SkillTest {
+  id: string;
+  skill: "reading" | "listening" | "speaking" | "writing";
+  level: string;
+  progress: number;
+  bestScore?: number;
+  attempts: number;
+  isAvailable: boolean;
+}
+
+const skillTestsData: SkillTest[] = [
+  {
+    id: "skill-1",
+    skill: "reading",
+    level: "B1",
+    progress: 75,
+    bestScore: 85,
+    attempts: 3,
+    isAvailable: true,
+  },
+  {
+    id: "skill-2",
+    skill: "listening",
+    level: "B1",
+    progress: 60,
+    bestScore: 78,
+    attempts: 2,
+    isAvailable: true,
+  },
+  {
+    id: "skill-3",
+    skill: "speaking",
+    level: "B1",
+    progress: 40,
+    attempts: 1,
+    isAvailable: true,
+  },
+  {
+    id: "skill-4",
+    skill: "writing",
+    level: "B1",
+    progress: 50,
+    bestScore: 72,
+    attempts: 2,
+    isAvailable: true,
+  },
+];
+
 class ExamService {
   // Get all exams
   getAll(): Exam[] {
@@ -92,6 +140,16 @@ class ExamService {
       return true;
     }
     return false;
+  }
+
+  // Get all skill tests
+  getSkillTests(): SkillTest[] {
+    return skillTestsData;
+  }
+
+  // Get skill test by skill type
+  getSkillTestByType(skill: SkillTest["skill"]): SkillTest | undefined {
+    return skillTestsData.find((test) => test.skill === skill);
   }
 }
 

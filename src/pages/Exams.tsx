@@ -1,6 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card } from "@/components/ui/card";
 import { ExamCard } from "@/components/ExamCard";
+import { SkillTestCard } from "@/components/SkillTestCard";
 import { TrendingUp, Award, Clock } from "lucide-react";
 import { examService } from "@/services/exam.service";
 
@@ -8,6 +9,7 @@ const Exams = () => {
   const upcomingExams = examService.getUpcoming();
   const completedExams = examService.getCompleted();
   const averageGrade = examService.getAverageGrade();
+  const skillTests = examService.getSkillTests();
 
   return (
     <MainLayout>
@@ -55,6 +57,20 @@ const Exams = () => {
             </div>
           </Card>
         </div>
+
+        {/* Skills Tests */}
+        <section>
+          <h2 className="text-xl font-bold text-foreground mb-4">Skills Assessment Tests</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {skillTests.map((skillTest) => (
+              <SkillTestCard 
+                key={skillTest.id} 
+                skillTest={skillTest}
+                onStartTest={(id) => console.log('Start test:', id)}
+              />
+            ))}
+          </div>
+        </section>
 
         {/* Upcoming Exams */}
         {upcomingExams.length > 0 && (
