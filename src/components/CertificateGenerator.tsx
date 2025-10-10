@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Certificate } from "@/models/certificate.model";
 import platformLogo from "@/assets/platform-logo.png";
+import logoWatermark from "@/assets/logo-watermark.png";
 
 // Define styles for PDF
 const styles = StyleSheet.create({
@@ -24,6 +25,16 @@ const styles = StyleSheet.create({
     padding: 40,
     height: "100%",
     position: "relative",
+  },
+  watermark: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    height: 400,
+    opacity: 0.08,
+    zIndex: 0,
   },
   innerBorder: {
     border: "2px solid #D4AF37",
@@ -173,6 +184,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
   <Document>
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.container}>
+        <Image src={logoWatermark} style={styles.watermark} />
         <View style={styles.innerBorder}>
           {/* Platform Header */}
           <View style={styles.platformHeader}>
