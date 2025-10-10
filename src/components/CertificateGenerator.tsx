@@ -194,7 +194,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
         <View style={styles.innerBorder}>
           {/* Platform Header */}
           <View style={styles.platformHeader}>
-            <Image src={platformLogo} style={styles.logo} />
+            <Image src={logoWatermark} style={styles.logo} />
             <Text style={styles.platformName}>CAMBRIDGE</Text>
           </View>
 
