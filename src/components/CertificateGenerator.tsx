@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     height: 400,
     marginLeft: -200,
     marginTop: -200,
-    opacity: 0.05,
+    opacity: 0.12,
     zIndex: 0,
   },
   innerBorder: {
@@ -54,13 +54,14 @@ const styles = StyleSheet.create({
   platformHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     marginBottom: 25,
+    paddingLeft: 20,
   },
   logo: {
-    width: 80,
-    height: 80,
-    marginRight: 0,
+    width: 60,
+    height: 60,
+    marginRight: 12,
   },
   platformName: {
     fontSize: 26,
@@ -194,6 +195,7 @@ const CertificatePDF: React.FC<{ certificate: Certificate; studentName: string }
           {/* Platform Header */}
           <View style={styles.platformHeader}>
             <Image src={platformLogo} style={styles.logo} />
+            <Text style={styles.platformName}>CAMBRIDGE</Text>
           </View>
 
           {/* Header */}
