@@ -251,6 +251,86 @@ class MessageService {
     if (contact) contact.pinned = !contact.pinned;
   }
 
+  // ----- message level actions (static/local only) -----
+
+  deleteMessage(contactId: string, messageId: string): Message[] {
+    const list = messagesData[contactId] || [];
+    messagesData[contactId] = list.filter((m) => m.id !== messageId);
+    return [...messagesData[contactId]];
+  }
+
+  toggleMessagePin(contactId: string, messageId: string): Message[] {
+    const list = messagesData[contactId] || [];
+    const message = list.find((m) => m.id === messageId);
+    if (message) message.pinned = !message.pinned;
+    return [...list];
+  }
+
+  toggleReaction(contactId: string, messageId: string, emoji: string): Message[] {
+    const list = messagesData[contactId] || [];
+    const message = list.find((m) => m.id === messageId);
+    if (message) {
+      const reactions = message.reactions || [];
+      message.reactions = reactions.includes(emoji)
+        ? reactions.filter((r) => r !== emoji)
+        : [...reactions, emoji];
+    }
+    return [...list];
+  }
+
+  forwardMessage(targetContactId: string, message: Message): Message[] {
+    const copy: Message = {
+      ...message,
+      id: `${Date.now()}-fwd`,
+      isOwn: true,
+      sender: "You",
+      status: "sent",
+      forwarded: true,
+      pinned: false,
+      reactions: [],
+      replyTo: null,
+      dayLabel: undefined,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    if (!messagesData[targetContactId]) messagesData[targetContactId] = [];
+    messagesData[targetContactId].push(copy);
+    const contact = this.getContactById(targetContactId);
+    if (contact) {
+      contact.lastMessage = copy.content;
+      contact.timestamp = "Just now";
+    }
+    return [...messagesData[targetContactId]];
+  }
+
+  getPinnedMessages(contactId: string): Message[] {
+    return (messagesData[contactId] || []).filter((m) => m.pinned);
+  }
+
+  /** Demo auto-reply so the chat feels alive without a backend */
+  createAutoReply(contactId: string): Message | null {
+    const contact = this.getContactById(contactId);
+    if (!contact) return null;
+    const replies = [
+      "Got it, thanks for letting me know!",
+      "Sure, I'll check that and get back to you.",
+      "Great question — let's discuss it in the next session.",
+      "Perfect 👍",
+      "Noted. Keep up the good work!",
+    ];
+    const reply: Message = {
+      id: `${Date.now()}-auto`,
+      sender: contact.type === "group" ? "Emma" : contact.name,
+      content: replies[Math.floor(Math.random() * replies.length)],
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      isOwn: false,
+    };
+    if (!messagesData[contactId]) messagesData[contactId] = [];
+    messagesData[contactId].push(reply);
+    contact.lastMessage = reply.content;
+    contact.timestamp = "Just now";
+    return reply;
+  }
+
   // Get unread count
   getUnreadCount(): number {
     return contactsData.reduce((sum, contact) => sum + contact.unread, 0);
