@@ -27,4 +27,7 @@ export interface Message {
   status?: MessageStatus;
   replyTo?: { sender: string; content: string } | null;
   dayLabel?: string;
+  reactions?: string[];
+  pinned?: boolean;
+  forwarded?: boolean;
 }
